@@ -35,7 +35,7 @@ export class ProductController {
   }
 
   @Patch('/update/:productId')
-  public async editProduct(
+  public async updateProduct(
     @Body() updateProductDto: CreateProductDTO,
     @Param('productId') productId: number,
   ): Promise<Product> {
