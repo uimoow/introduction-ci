@@ -39,8 +39,11 @@ describe('ProductService', () => {
       jest
         .spyOn(mockRepository, "insert")
         .mockImplementation(async () => {
-          const result: InsertResult = new InsertResult();
-          result.identifiers[0] = product;
+          const result: InsertResult = {
+            raw: [],
+            identifiers: [{ product },],
+            generatedMaps: [],
+          };
           return result;
         });
 
@@ -54,8 +57,8 @@ describe('ProductService', () => {
     });
   });
 
-  describe("deleteProduct()", () => {
-    it("データ登録に失敗した場合、InternalServerErrorExceptionがthrowされること", () => {
+  describe("createProduct()", () => {
+    it("データ登録に失敗した場合、InternalServerErrorExceptionをthrowすること", () => {
       const dto: CreateProductDTO = {
         name: "Mango",
         description: "test",
@@ -67,7 +70,7 @@ describe('ProductService', () => {
         .spyOn(mockRepository, "insert")
         .mockRejectedValue(new UnauthorizedException(msg));
 
-      expect(service.createProduct(dto)).rejects.toEqual(
+      expect(service.createProduct(dto)).rejects.toThrow(
         new InternalServerErrorException(`[${msg}]: Failed to create product`,)
       );
     });
@@ -90,13 +93,13 @@ describe('ProductService', () => {
       let product: Product;
       const products: Product[] = [];
 
-      for (let i:number = 1; i<=5; i++) {
+      for (let i: number = 1; i <= 5; i++) {
         product = new Product();
         product.id = i;
         product.name = "name" + i;
         product.description = "description" + i;
         product.price = String(100 + i);
-        products[i-1] = product;
+        products[i - 1] = product;
       }
 
       jest
@@ -138,7 +141,7 @@ describe('ProductService', () => {
           return null;
         });
 
-      expect(service.getProduct(productId)).rejects.toEqual(
+      expect(service.getProduct(productId)).rejects.toThrow(
         new NotFoundException('Product not found')
       );
     });
@@ -196,7 +199,7 @@ describe('ProductService', () => {
           return null;
         });
 
-      expect(service.updateProduct(productId, dto)).rejects.toEqual(
+      expect(service.updateProduct(productId, dto)).rejects.toThrow(
         new NotFoundException('Product not found')
       );
     });
@@ -205,8 +208,10 @@ describe('ProductService', () => {
   describe("deleteProduct()", () => {
     it("データ削除に成功すること", () => {
       const productId: number = 1;
-      const result: DeleteResult = new DeleteResult();
-      result.affected = 1;
+      const result: DeleteResult = {
+        raw: [],
+        affected: 1,
+      };
 
       jest
         .spyOn(mockRepository, "delete")
@@ -219,7 +224,7 @@ describe('ProductService', () => {
   });
 
   describe("deleteProduct()", () => {
-    it("データ削除に失敗した場合、InternalServerErrorExceptionがthrowされること", () => {
+    it("データ削除に失敗した場合、InternalServerErrorExceptionをthrowすること", () => {
       const productId: number = 1;
       const msg: string = "Password has expired";
 
@@ -227,8 +232,8 @@ describe('ProductService', () => {
         .spyOn(mockRepository, "delete")
         .mockRejectedValue(new UnauthorizedException(msg));
 
-      expect(service.deleteProduct(productId)).rejects.toEqual(
-        new InternalServerErrorException(`[${msg}]: Failed to delete product`,)
+      expect(service.deleteProduct(productId)).rejects.toThrow(
+        new InternalServerErrorException(`[${msg}]: Failed to delete product`)
       );
     });
   });
