@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
-import { Product } from './product.entity';
 import { CreateProductDTO } from './dto/create-product.dto';
+import { Product } from './product.entity';
 
 @Injectable()
 export class ProductService {
@@ -14,7 +14,13 @@ export class ProductService {
   public async createProduct(
     createProductDto: CreateProductDTO,
   ): Promise<Product> {
-    const result: InsertResult = await this.productRepository.insert(createProductDto)
+    const { name, description, price } = createProductDto;
+    const product = new Product();
+    product.name = name;
+    product.description = description;
+    product.price = price;
+
+    const result: InsertResult = await this.productRepository.insert(product)
       .catch((e) => {
         throw new InternalServerErrorException(`[${e.message}]: Failed to create product`,);
       });
@@ -41,7 +47,11 @@ export class ProductService {
     if (!targetProduct) {
       throw new NotFoundException('Product not found');
     }
-    return this.productRepository.save(updateProductDto);
+    const { name, description, price } = updateProductDto;
+    targetProduct.name = name;
+    targetProduct.description = description;
+    targetProduct.price = price;
+    return this.productRepository.save(targetProduct);
   }
 
   public async deleteProduct(productId: number): Promise<DeleteResult> {
